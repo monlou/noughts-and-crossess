@@ -1,0 +1,18 @@
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.deps.json
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.fsprojAssemblyReference.cache
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/Monique/Downloads/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.deps.json
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.fsprojAssemblyReference.cache
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/monique/Documents/Uni/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.deps.json
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/bin/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.fsprojAssemblyReference.cache
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.dll
+/Users/monique/Documents/Uni/CAB402 Programming Paradigms/Assessment/Assignment 1/TicTacToe/TicTacToeModelInterfaces/obj/Debug/netstandard2.0/TicTacToeModelInterfaces.pdb
