@@ -12,119 +12,139 @@ namespace QUT
                 member this.Row with get() = this.row 
                 member this.Col with get() = this.col 
 
-        // type to represent the current state of the game, including the size of the game (NxN), who's turn it is and the pieces on the board
+        // type to represent the current state of the game, including the size of the game (NxN), 
+        // whose turn it is and the pieces on the board
         type GameState = 
             { turn: Player; size: int; board: Map<Move, Player> }
             interface ITicTacToeGame<Player> with
                 member this.Turn with get()    = this.turn
                 member this.Size with get()    = this.size 
                 member this.getPiece(row, col) = 
-                    let cell = Map.tryFind {row = row; col = col} this.board
+                    let move = {row = row; col = col} 
+                    let cell = Map.tryFind move this.board
                     match cell with 
                     | Some Player.Cross -> "X"
                     | Some Player.Nought -> "O"
                     | None -> ""
 
-        let CreateMove row col = //raise (System.NotImplementedException("CreateMove"))
+        let CreateMove row col = 
             { Move.row = row; Move.col = col }
 
-        let ApplyMove (oldState:GameState) (move: Move) = //raise (System.NotImplementedException("CreateMove"))
-            let currentPlayer = oldState.turn          
+        let ApplyMove (oldState: GameState) (move: Move) = 
+            let currentPlayer = oldState.turn  
+            let nextPlayer = if currentPlayer = Nought then Cross else Nought
             let oldBoard = oldState.board
             let newBoard = oldBoard.Add(move, currentPlayer)
-            { oldState with board = newBoard } 
+            { oldState with turn = nextPlayer; board = newBoard } 
 
         // Returns a sequence containing all of the lines on the board: Horizontal, Vertical and Diagonal
-        // The number of lines returned should always be (size*2+2)
-        // the number of squares in each line (represented by (row,column) coordinates) should always be equal to size
-        // For example, if the input size = 2, then the output would be: 
-        //     seq [seq[(0,0);(0,1)];seq[(1,0);(1,1)];seq[(0,0);(1,0)];seq[(0,1);(1,1)];seq[(0,0);(1,1)];seq[(0,1);(1,0)]]
-        // The order of the lines and the order of the squares within each line does not matter
-        let Lines (size: int) : seq<seq<int*int>> = //raise (System.NotImplementedException("Lines"))
+        let Lines (size: int) : seq<seq<int*int>> = 
             // Create vertical lines 
-            let vertical: seq<seq<int*int>> = 
-                seq { for col in 0..size-1 do 
-                    seq { for row in 0..size-1 
-                        do yield row, col } }
+            let vertical = 
+                seq { 
+                    for col in 0..size-1 do 
+                        yield seq {
+                            for row in 0..size-1 do 
+                                yield row, col } }
 
             // Create horizontal lines 
-            let horizontal: seq<seq<int*int>> = 
-                seq { for row in 0..size-1 do
-                    seq { for col in 0..size-1 
-                        do yield row, col } }
+            let horizontal = 
+                seq { 
+                    for row in 0..size-1 do
+                        yield seq { 
+                            for col in 0..size-1 do 
+                                yield row, col } }
 
             // Create diagonal lines 
-            let diagonal: seq<seq<int*int>> = 
-                seq { for row in 0..size-1 do
-                    seq { for col in 0..size-1 do 
-                        if row = col then yield row, col else 
-                        if row + col = size then yield row, col } }
+            let diagonal = 
+                seq { 
+                    yield seq { 
+                        for row in 0..size-1 do
+                            for col in 0..size-1 do 
+                                if row + col = size-1 then yield row, col } 
+                    yield seq { 
+                        for row in 0..size-1 do
+                            for col in 0..size-1 do 
+                                  if row = col then yield row, col } 
+                }
 
             //Concat 
             Seq.concat [vertical; horizontal; diagonal]
 
         // Checks a single line (specified as a sequence of (row,column) coordinates) to determine if one of the players
         // has won by filling all of those squares, or a Draw if the line contains at least one Nought and one Cross
-        let CheckLine (game: GameState) (line: seq<int*int>) : TicTacToeOutcome<Player> = raise (System.NotImplementedException("CheckLine"))
-            //let pieces = 
-                //seq { for cell in line do yield game.getPiece(cell.row, cell.col) }
-            //for pieces in cell do 
-                //if pieces = "" then TicTacToeOutcome.Undecided else 
-                //if pieces are all equal tokens 
-                
-                // If all cells are filled, 
-                // Check if all pieces are the same 
-                    // If yes, return winning piece 
-                    // Else return Draw 
-                // Else return undetermined 
+        let CheckLine (game: GameState) (line: seq<int*int>) : TicTacToeOutcome<Player> = 
+            // Create sequence of pieces from sequence of coords  
+            let pieces = 
+                line 
+                // Create a Move object using coordinates in tuple 
+                |> Seq.map (fun (row,col) -> CreateMove row col)
+                // Use move object to determine pieces on board 
+                |> Seq.map (fun move -> game.board.TryFind move)
 
+            // Check if line contains all Cross pieces and return Cross as winner  
+            if Seq.forall (fun piece -> piece = Some Cross) pieces then TicTacToeOutcome.Win(Cross, line) else 
+            // Check if line contains all Nought pieces and return Nought as winner
+            if Seq.forall (fun piece -> piece = Some Nought) pieces then TicTacToeOutcome.Win(Nought, line) else 
+            // Check for both pieces in the line 
+            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then TicTacToeOutcome.Draw else 
+            // Any other outcome means the game is still undecided for this line 
+            TicTacToeOutcome.Undecided
 
+        let GameOutcome game = 
+            // Generate all lines line game 
+            let size = game.size 
+            let lines = Lines size 
 
+            // Return most important outcome - Win takes precedence over Undecided, Undecided over win
+            let scorer = function 
+            | Win(_,_) -> 2 
+            | Undecided -> 1
+            | Draw -> 0 
 
+            // Check outcome for each line 
+            lines 
+            |> Seq.map (fun line -> CheckLine game line) 
+            |> Seq.maxBy scorer 
 
-            //let rec check = 
-
-            //for piece in pieces-1 do 
-                //if piece != piece+1 then 
-                    //TicTacToeOutcome.Draw
-                //else if piece = piece+1 then 
-                     
-
-        let GameOutcome game = raise (System.NotImplementedException("GameOutcome"))
-            //let size = game.size 
-            //let lines = Lines size 
-            //for line in lines do 
-                //let outcome = CheckLine game line
-                //if player returned, game over 
-                //{ game, game.turn, outcome }     
-
-        let GameStart (firstPlayer:Player) size = //raise (System.NotImplementedException("GameStart"))
+        let GameStart firstPlayer size = 
             { GameState.turn = firstPlayer; GameState.size = size; GameState.board = Map.empty }
 
-        // Helper functions 
-        let heuristic game player = 
-            raise (System.NotImplementedException("heuristic"))
+        // MiniMax helper functions 
+        let Heuristic game player = 
+            let outcome = GameOutcome game 
+            match outcome with 
+            | TicTacToeOutcome.Draw -> 0
+            | TicTacToeOutcome.Win(player, _) -> 1
+            | _ -> -1
 
-        let getTurn game = 
+        let GetTurn game = 
             game.turn
 
-        let gameOver game = 
-            GameOutcome game
+        let GameOver game = 
+            let outcome = GameOutcome game
+            match outcome with 
+            | TicTacToeOutcome.Undecided -> false 
+            | _ -> true 
 
-        let moveGenerator game = raise (System.NotImplementedException(" move"))
-            //seq { for move in game.board do
-                    //if game.getPiece(move) = "" then yield move }
+        let MoveGenerator game = 
+            let size = game.size-1 
+            // Generate a sequence of all board coords 
+            seq { 
+                for row in 0..size do 
+                    for col in 0..size do 
+                        yield (row, col) }
 
-        let applyMove game = 
-            raise (System.NotImplementedException("apply move"))
-
+            // Return all empty cells to create a list of possible moves remaining
+            |> Seq.map (fun (row,col) -> CreateMove row col)
+            |> Seq.filter (fun move -> game.board.ContainsKey(move) |> not)
+                   
         // Game AI 
-        let MiniMax game = //raise (System.NotImplementedException("MiniMax")
-            GameTheory.MiniMaxGenerator heuristic getTurn gameOver moveGenerator applyMove 
+        let MiniMax = 
+            GameTheory.MiniMaxGenerator Heuristic GetTurn GameOver MoveGenerator ApplyMove 
 
-        let MiniMaxWithPruning game = //raise (System.NotImplementedException("MiniMaxWithPruning"))
-            GameTheory.MiniMaxWithAlphaBetaPruningGenerator heuristic getTurn gameOver moveGenerator applyMove 
-            
+        let MiniMaxWithPruning = 
+            GameTheory.MiniMaxWithAlphaBetaPruningGenerator Heuristic GetTurn GameOver MoveGenerator ApplyMove
 
         [<AbstractClass>]
         type Model() =
@@ -141,10 +161,21 @@ namespace QUT
         type BasicMiniMax() =
             inherit Model()
             override this.ToString()         = "Pure F# with basic MiniMax";
-            override this.FindBestMove(game) = raise (System.NotImplementedException("FindBestMove"))
-
+            override this.FindBestMove(game) = 
+                NodeCounter.Reset()
+                let (bestMove,bestScore) = MiniMax game game.turn
+                match bestMove with 
+                | Some move -> move 
+                | None -> raise (System.Exception("Game is over."))
 
         type WithAlphaBetaPruning() =
             inherit Model()
             override this.ToString()         = "Pure F# with Alpha Beta Pruning";
-            override this.FindBestMove(game) = raise (System.NotImplementedException("FindBestMove"))
+            override this.FindBestMove(game) = 
+                NodeCounter.Reset()
+                let alpha = 1
+                let beta = -1
+                let (bestMove,bestScore) = MiniMaxWithPruning alpha beta game game.turn
+                match bestMove with 
+                | Some move -> move 
+                | None -> raise (System.Exception("Game is over.")) 

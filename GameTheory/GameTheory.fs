@@ -15,26 +15,16 @@ namespace QUT
                 // Check current player 
                 let currentPlayer = getTurn game 
 
-                if leafNode then None, heuristic game currentPlayer 
-                else None, heuristic game currentPlayer 
-                //if turn = perspective then (None, heuristic game turn) //maximise 
-                     //let score = heuristic game turn 
-                     //let move = moveGenerator game 
-
-                
-                //else // minimise 
-
-                // If game over 
-                    // Break? 
-                // If maximising player (check current player against perspective)
-                    // For each child node -- take max score 
-                    // Return value 
-                // Else minimising player 
-                    // For each child node -- take min score 
-                    // Return value 
-                
-
-                raise (System.NotImplementedException("MiniMax"))
+                // If the game is over, do not return a Move 
+                if leafNode then (None, heuristic game perspective) else 
+                    // Generate sequence of possible moves 
+                    moveGenerator game
+                    // Create new game state for each possible move 
+                    |> Seq.map (fun move -> move, applyMove game move)
+                    // Run MiniMax for each new state 
+                    |> Seq.map (fun (move,outcome) -> Some move, snd (MiniMax outcome perspective))
+                    // Return the best move for the maximising player and worst for the minimising player
+                    |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
 
             NodeCounter.Reset()
             MiniMax
@@ -47,6 +37,25 @@ namespace QUT
             let rec MiniMax alpha beta oldState perspective =
                 NodeCounter.Increment()
 
-                raise (System.NotImplementedException("Alpha Beta Pruning"))
+                // Check game state 
+                let leafNode = gameOver oldState
+
+                // Check current player 
+                let currentPlayer = getTurn oldState
+
+                // If the game is over, do not return a Move 
+                if leafNode then (None, heuristic oldState perspective) else 
+                    // Generate sequence of possible moves 
+                    moveGenerator oldState
+                    // Create new game state for each possible move 
+                    |> Seq.map (fun move -> move, applyMove oldState move)
+                    // Run MiniMax for each new state 
+                    |> Seq.map (fun (move,outcome) -> Some move, snd (MiniMax alpha beta outcome perspective))
+                    // Return the best move for the maximising player and worst for the minimising player
+                    |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
+                    //|> if currentPlayer = perspective then max(fst alpha) else min (fst beta)
+                    // Determine whether or not to purne 
+                    //|> if beta <= alpha then break
+
             NodeCounter.Reset()
             MiniMax
