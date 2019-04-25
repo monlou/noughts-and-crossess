@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq; 
 using System.Collections.Generic;
 
 namespace QUT.CSharpTicTacToe
@@ -237,40 +238,43 @@ namespace QUT.CSharpTicTacToe
 
         public (Move, int) MiniMax(Game game, Player perspective)
         {
-            //    // Determine whether current player is maximising or minimising 
-            //    Player currentPlayer = game.Turn; 
-            //    bool maximising = currentPlayer == perspective; 
-            //    // Check if the game is over 
-            //    bool over = GameOver(game); 
-            //    if(over)
-            //    {
-            //        return (null, Heuristic(game)); 
-            //    } else
-            //    {
-            //        List<Move> moves = MoveGenerator(game);
+            // Check if the game is over 
+            bool over = GameOver(game); 
+            if(over)
+            {
+                return (null, Heuristic(game, perspective)); 
+            } 
 
-            //        foreach (Move move in moves) {
-            //            Game newGame = ApplyMove(game, move);
-            //            if (maximising)
-            //            {
-            //                int maxValue = -1;
+            // Generate all possible game outcomes 
+            List<Move> moves = MoveGenerator(game);
+            List<Game> games = new List<Game>();
+            List<(Move, int)> gameOutcomes = new List<(Move, int)>(); 
 
-            //                maxValue =  
-            //    }
-            //            else
-            //            {
-            //                int minValue = 1;
-            //            }
-            //        }
-            //    }
-            Move move = CreateMove(0, 0); 
-            return (move, 0); 
+            foreach (Move outcome in moves) {
+                games.Add(ApplyMove(game, outcome));
+            }
+
+            foreach (Game gameOptions in games)
+            {
+                gameOutcomes.Add(MiniMax(gameOptions, perspective));
+            }
+
+            gameOutcomes.OrderByDescending(score => score.Item2).ToList();
+
+            if (game.Turn == perspective)
+            {
+                return gameOutcomes.First(); 
+            }
+            else 
+            {
+                return gameOutcomes.Last();
+            }
         }
 
         public Move FindBestMove(Game game)
         {
             //throw new System.NotImplementedException("FindBestMove");
-            (Move move, int score) = MiniMax(game, game.Turn);
+            (Move move, int score) = Minimax(game, game.Turn);
 
             return move; 
         }

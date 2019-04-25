@@ -26,15 +26,20 @@ namespace QUT
         let CreateMove row col = 
             { Move.row = row; Move.col = col }
 
-        let ApplyMove game move = 
-            // Add the move to the board dictionary 
-            let currentBoard = game.board
-            game.board.Add (move,game.turn)
+        let ChangePlayerFrom player = 
+            match player with 
+            | Nought -> Cross
+            | Cross -> Nought
 
+        let ApplyMove game move = 
             // Update the current player 
             let currentPlayer = game.turn 
-            let nextPlayer = if currentPlayer = Nought then Cross else Nought
+            let nextPlayer = ChangePlayerFrom currentPlayer
             game.turn <- nextPlayer
+
+            // Add the move to the board dictionary 
+            let currentBoard = game.board
+            game.board.Add (move,currentPlayer)
 
             // Return the game state 
             game
@@ -82,14 +87,16 @@ namespace QUT
                 |> Seq.map (fun (row,col) -> CreateMove row col)
                 // Use move object to determine pieces on board 
                 |> Seq.map (fun move -> game.board.TryGetValue move)
-                |> Seq.map (fun (bool,player) -> player)
+                // Ignore the Boolean value, just return players 
+                |> Seq.map (fun (result,player) -> if result then Some player else None)
+                //|> Seq.map (fun (result,player) -> player)
 
             // Check if line contains all Cross pieces and return Cross as winner  
-            if Seq.forall (fun piece -> piece = Cross) pieces then TicTacToeOutcome.Win(Cross, line) else 
+            if Seq.forall (fun piece -> piece = Some Cross) pieces then TicTacToeOutcome.Win(Cross, line) else 
             // Check if line contains all Nought pieces and return Nought as winner
-            if Seq.forall (fun piece -> piece = Nought) pieces then TicTacToeOutcome.Win(Nought, line) else 
+            if Seq.forall (fun piece -> piece = Some Nought) pieces then TicTacToeOutcome.Win(Nought, line) else 
             // Check for both pieces in the line 
-            if Seq.contains (Cross) pieces && Seq.contains (Nought) pieces then TicTacToeOutcome.Draw else 
+            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then TicTacToeOutcome.Draw else 
             // Any other outcome means the game is still undecided for this line 
             TicTacToeOutcome.Undecided
 
@@ -142,16 +149,14 @@ namespace QUT
             GameTheory.MiniMaxGenerator Heuristic GetTurn GameOver MoveGenerator ApplyMove
 
         let FindBestMove game = 
-            //NodeCounter.Reset()
-
-            let (bestMove,bestScore) = 
-                MiniMax game game.turn 
+            NodeCounter.Reset()
+            let (bestMove,bestScore) = MiniMax game game.turn
             match bestMove with 
             | Some move -> move 
             | None -> raise (System.Exception("Game is over."))
 
         let GameStart first size = 
-            { turn = first; size = size; board = new System.Collections.Generic.Dictionary<Move, Player>() }
+           { turn = first; size = size; board = new System.Collections.Generic.Dictionary<Move, Player>() }
 
         type WithAlphaBetaPruning() =
             override this.ToString()         = "Impure F# with Alpha Beta Pruning";

@@ -100,6 +100,7 @@ namespace QUT
                 for (int col = 0; col < size; col++)
                 {
                     var square = new TicTacToeSquareModel(row, col);
+                    square.IsHumanTurn = humanFirst;
                     square.SelectCommand.Subscribe(HumanMove);
                     squares.Add(square);
                 }
