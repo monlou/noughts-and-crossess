@@ -5,9 +5,12 @@ namespace QUT.CSharpTicTacToe
 {
     public class Game : ITicTacToeGame<Player>
     {
-        public int Size { get => Size; set => this.Size = Size; }
-        public Player Turn { get => Turn; set => this.Turn = Turn; }
-        public Dictionary<Move, Player> Board { get => Board; set => this.Board = Board; }
+        public int Size { get; set; }
+
+        public Player Turn { get; set; }
+
+        public Dictionary<Move, Player> Board { get; set; }
+
         public string getPiece(int row, int col)
         {
             // Create Move object for use as dictionary key 
@@ -35,7 +38,7 @@ namespace QUT.CSharpTicTacToe
             }
 
             // Final path returns empty string 
-            return ""; 
+            return "";
         }
     }
 }

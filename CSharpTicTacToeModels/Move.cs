@@ -2,7 +2,7 @@
 {
     public class Move : ITicTacToeMove
     {
-        public int Row { get => Row; set => this.Row = Row; }
-        public int Col { get => Col; set => this.Col = Col; }
+        public int Row { get; set; }
+        public int Col { get; set; }
     }
 }

@@ -114,9 +114,9 @@ namespace QUT
         let Heuristic game player = 
             let outcome = GameOutcome game 
             match outcome with 
-            | TicTacToeOutcome.Draw -> 0
-            | TicTacToeOutcome.Win(player, _) -> 1
-            | _ -> -1
+            | Win(winner, _) when winner = player -> 1
+            | Win(winner, _) when winner <> player -> -1
+            | _ -> 0
 
         let GetTurn game = 
             game.turn

@@ -113,9 +113,9 @@ namespace QUT
         let Heuristic game player = 
             let outcome = GameOutcome game 
             match outcome with 
-            | TicTacToeOutcome.Draw -> 0
-            | TicTacToeOutcome.Win(player, _) -> 1
-            | _ -> -1
+            | Win(winner, _) when winner = player -> 1
+            | Win(winner, _) when winner <> player -> -1
+            | _ -> 0
 
         let GetTurn game = 
             game.turn
@@ -138,10 +138,12 @@ namespace QUT
             |> Seq.map (fun (row,col) -> CreateMove row col)
             |> Seq.filter (fun move -> game.board.ContainsKey(move) |> not)
 
+        let MiniMax = 
+            GameTheory.MiniMaxGenerator Heuristic GetTurn GameOver MoveGenerator ApplyMove
+
         let FindBestMove game = 
-            NodeCounter.Reset()
-            let MiniMax = 
-                GameTheory.MiniMaxGenerator Heuristic GetTurn GameOver MoveGenerator ApplyMove
+            //NodeCounter.Reset()
+
             let (bestMove,bestScore) = 
                 MiniMax game game.turn 
             match bestMove with 
