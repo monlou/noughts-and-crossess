@@ -17,14 +17,14 @@ namespace QUT
 
                 // If the game is over, do not return a Move 
                 if leafNode then (None, heuristic game perspective) else 
-                    // Generate sequence of possible moves 
-                    moveGenerator game
-                    // Create new game state for each possible move 
-                    |> Seq.map (fun move -> move, applyMove game move)
-                    // Run MiniMax for each new state 
-                    |> Seq.map (fun (move,outcome) -> Some move, snd (MiniMax outcome perspective))
-                    // Return the best move for the maximising player and worst for the minimising player
-                    |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
+                // Generate sequence of possible moves 
+                moveGenerator game
+                // Create new game state for each possible move 
+                |> Seq.map (fun move -> move, applyMove game move)
+                // Run MiniMax for each new state 
+                |> Seq.map (fun (move,outcome) -> Some move, snd (MiniMax outcome perspective))
+                // Return the best move for the maximising player and worst for the minimising player
+                |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
 
             NodeCounter.Reset()
             MiniMax
@@ -43,19 +43,20 @@ namespace QUT
                 // Check current player 
                 let currentPlayer = getTurn oldState
 
+                let AlphaBetaCheck alpha beta outcome perspective = 
+                    if alpha <= beta then (None, heuristic outcome perspective) else MiniMax alpha beta outcome perspective 
+
                 // If the game is over, do not return a Move 
                 if leafNode then (None, heuristic oldState perspective) else 
-                    // Generate sequence of possible moves 
-                    moveGenerator oldState
-                    // Create new game state for each possible move 
-                    |> Seq.map (fun move -> move, applyMove oldState move)
-                    // Run MiniMax for each new state 
-                    |> Seq.map (fun (move,outcome) -> Some move, snd (MiniMax alpha beta outcome perspective))
-                    // Return the best move for the maximising player and worst for the minimising player
-                    |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
-                    //|> if currentPlayer = perspective then max(fst alpha) else min (fst beta)
-                    // Determine whether or not to purne 
-                    //|> if beta <= alpha then break
-
+                // Generate sequence of possible moves 
+                moveGenerator oldState
+                // Create new game state for each possible move 
+                |> Seq.map (fun move -> move, applyMove oldState move)
+                // Run MiniMax for each new state 
+                |> Seq.map (fun (move,outcome) -> Some move, snd (AlphaBetaCheck alpha beta outcome perspective))
+                // Return the best move for the maximising player and worst for the minimising player
+                |> if currentPlayer = perspective then Seq.maxBy snd else Seq.minBy snd
+                    
             NodeCounter.Reset()
             MiniMax
+            

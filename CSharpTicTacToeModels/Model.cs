@@ -238,7 +238,7 @@ namespace QUT.CSharpTicTacToe
 
         public (Move, int) MiniMax(Game game, Player perspective)
         {
-            // Check if the game is over 
+            // Check if the game is over, return score 
             bool over = GameOver(game); 
             if(over)
             {
@@ -250,32 +250,83 @@ namespace QUT.CSharpTicTacToe
             List<Game> games = new List<Game>();
             List<(Move, int)> gameOutcomes = new List<(Move, int)>(); 
 
+            // Create a new Game including possible Move for each Move 
             foreach (Move outcome in moves) {
                 games.Add(ApplyMove(game, outcome));
             }
 
+            // Using new Game states, retrieve Move scores 
             foreach (Game gameOptions in games)
             {
                 gameOutcomes.Add(MiniMax(gameOptions, perspective));
             }
 
-            gameOutcomes.OrderByDescending(score => score.Item2).ToList();
-
+            // Return the maximum score is maximising 
             if (game.Turn == perspective)
             {
-                return gameOutcomes.First(); 
+                return gameOutcomes.Max();  
             }
+            // Return the minimum score if maximising 
             else 
             {
-                return gameOutcomes.Last();
+                return gameOutcomes.Min();
             }
+        }
+
+        public (Move, int) MiniMaxAlphaBeta(int alpha, int beta, Game game, Player perspective)
+        {
+            (Move, int) best; 
+            // Check if the game is over, return score 
+            bool over = GameOver(game);
+            if (over)
+            {
+                return (null, Heuristic(game, perspective));
+            }
+
+            // Generate all possible game outcomes 
+            List<Move> moves = MoveGenerator(game);
+            List<Game> games = new List<Game>();
+            List<(Move, int)> gameOutcomes = new List<(Move, int)>();
+
+            // Create a new Game including possible Move for each Move 
+            foreach (Move outcome in moves)
+            {
+                games.Add(ApplyMove(game, outcome));
+            }
+
+            // Using new Game states, retrieve Move scores 
+            foreach (Game gameOptions in games)
+            {
+                gameOutcomes.Add(MiniMax(gameOptions, perspective));
+            }
+
+            // Return the maximum score is maximising 
+            if (game.Turn == perspective)
+            {
+                (Move move, int score) max = gameOutcomes.Max();
+                alpha = Math.Max(max.score, alpha); 
+                best = max; 
+            }
+            // Return the minimum score if maximising 
+            else
+            {
+                (Move move, int score) min = gameOutcomes.Min();
+                beta = Math.Min(min.score, beta);
+                best = min;
+            }
+
+            if (alpha >= beta)
+            {
+                return best; 
+            }
+
+            return best; 
         }
 
         public Move FindBestMove(Game game)
         {
-            //throw new System.NotImplementedException("FindBestMove");
-            (Move move, int score) = Minimax(game, game.Turn);
-
+            (Move move, int score) = MiniMax(game, game.Turn);
+            //(Move move, int score) = MiniMaxAlphaBeta(1, 0, game, game.Turn);
             return move; 
         }
     }

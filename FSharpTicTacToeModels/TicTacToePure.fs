@@ -39,37 +39,29 @@ namespace QUT
 
         // Returns a sequence containing all of the lines on the board: Horizontal, Vertical and Diagonal
         let Lines (size: int) : seq<seq<int*int>> = 
-            // Create vertical lines 
-            let vertical = 
-                seq { 
-                    for col in 0..size-1 do 
-                        yield seq {
-                            for row in 0..size-1 do 
-                                yield row, col } }
+            seq { 
+                // Create vertical lines 
+                for col=0 to size-1 do 
+                    yield seq {
+                        for row in 0..size-1 do 
+                            yield row, col } 
 
-            // Create horizontal lines 
-            let horizontal = 
-                seq { 
+                // Create horizontal lines 
+                for row in 0..size-1 do
+                    yield seq { 
+                        for col in 0..size-1 do 
+                            yield row, col } 
+
+                // Create diagonal line from top left to bottom right  
+                yield seq { 
                     for row in 0..size-1 do
-                        yield seq { 
-                            for col in 0..size-1 do 
-                                yield row, col } }
-
-            // Create diagonal lines 
-            let diagonal = 
-                seq { 
-                    yield seq { 
-                        for row in 0..size-1 do
-                            for col in 0..size-1 do 
-                                if row + col = size-1 then yield row, col } 
-                    yield seq { 
-                        for row in 0..size-1 do
-                            for col in 0..size-1 do 
-                                  if row = col then yield row, col } 
-                }
-
-            //Concat 
-            Seq.concat [vertical; horizontal; diagonal]
+                        for col in 0..size-1 do 
+                            if row = col then yield row, col } 
+                // Create diagonal line from top right to bottom left 
+                yield seq { 
+                    for row in 0..size-1 do
+                        for col in 0..size-1 do 
+                              if row + col = size-1 then yield row, col } }
 
         // Checks a single line (specified as a sequence of (row,column) coordinates) to determine if one of the players
         // has won by filling all of those squares, or a Draw if the line contains at least one Nought and one Cross
@@ -83,13 +75,13 @@ namespace QUT
                 |> Seq.map (fun move -> game.board.TryFind move)
 
             // Check if line contains all Cross pieces and return Cross as winner  
-            if Seq.forall (fun piece -> piece = Some Cross) pieces then TicTacToeOutcome.Win(Cross, line) else 
+            if Seq.forall (fun piece -> piece = Some Cross) pieces then Win(Cross, line) else 
             // Check if line contains all Nought pieces and return Nought as winner
-            if Seq.forall (fun piece -> piece = Some Nought) pieces then TicTacToeOutcome.Win(Nought, line) else 
+            if Seq.forall (fun piece -> piece = Some Nought) pieces then Win(Nought, line) else 
             // Check for both pieces in the line 
-            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then TicTacToeOutcome.Draw else 
+            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then Draw else 
             // Any other outcome means the game is still undecided for this line 
-            TicTacToeOutcome.Undecided
+            Undecided
 
         let GameOutcome game = 
             // Generate all lines line game 

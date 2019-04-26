@@ -11,7 +11,7 @@ namespace QUT
                 member this.Col with get() = this.col
 
         type GameState = 
-            { mutable turn: Player; size: int; board: System.Collections.Generic.Dictionary<Move, Player> } 
+            { mutable turn: Player; size: int; mutable board: System.Collections.Generic.Dictionary<Move, Player> } 
             interface ITicTacToeGame<Player> with
                 member this.Turn with get()    = this.turn
                 member this.Size with get()    = this.size
@@ -22,6 +22,9 @@ namespace QUT
                     | true, Player.Cross -> "X"
                     | true, Player.Nought -> "O"
                     | false, _ -> ""
+
+        let GameStart first size = 
+           { turn = first; size = size; board = new System.Collections.Generic.Dictionary<Move, Player>() }
 
         let CreateMove row col = 
             { Move.row = row; Move.col = col }
@@ -34,48 +37,40 @@ namespace QUT
         let ApplyMove game move = 
             // Update the current player 
             let currentPlayer = game.turn 
-            let nextPlayer = ChangePlayerFrom currentPlayer
-            game.turn <- nextPlayer
+            game.turn <- ChangePlayerFrom currentPlayer
 
             // Add the move to the board dictionary 
             let currentBoard = game.board
-            game.board.Add (move,currentPlayer)
+            currentBoard.Add (move,currentPlayer)
 
             // Return the game state 
             game
 
         // Returns a sequence containing all of the lines on the board: Horizontal, Vertical and Diagonal
         let Lines (size: int) : seq<seq<int*int>> = 
-            // Create vertical lines 
-            let vertical = 
-                seq { 
-                    for col in 0..size-1 do 
-                        yield seq {
-                            for row in 0..size-1 do 
-                                yield row, col } }
+            seq { 
+                // Create vertical lines 
+                for col=0 to size-1 do 
+                    yield seq {
+                        for row in 0..size-1 do 
+                            yield row, col } 
 
-            // Create horizontal lines 
-            let horizontal = 
-                seq { 
+                // Create horizontal lines 
+                for row in 0..size-1 do
+                    yield seq { 
+                        for col in 0..size-1 do 
+                            yield row, col } 
+
+                // Create diagonal line from top left to bottom right  
+                yield seq { 
                     for row in 0..size-1 do
-                        yield seq { 
-                            for col in 0..size-1 do 
-                                yield row, col } }
-
-            // Create diagonal lines 
-            let diagonal = 
-                seq { 
-                    yield seq { 
-                        for row in 0..size-1 do
-                            for col in 0..size-1 do 
-                                if row + col = size-1 then yield row, col } 
-                    yield seq { 
-                        for row in 0..size-1 do
-                            for col in 0..size-1 do 
-                                  if row = col then yield row, col } }
-
-            //Concat 
-            Seq.concat [vertical; horizontal; diagonal]
+                        for col in 0..size-1 do 
+                            if row = col then yield row, col } 
+                // Create diagonal line from top right to bottom left 
+                yield seq { 
+                    for row in 0..size-1 do
+                        for col in 0..size-1 do 
+                              if row + col = size-1 then yield row, col } }
 
         // Checks a single line (specified as a sequence of (row,column) coordinates) to determine if one of the players
         // has won by filling all of those squares, or a Draw if the line contains at least one Nought and one Cross
@@ -87,18 +82,17 @@ namespace QUT
                 |> Seq.map (fun (row,col) -> CreateMove row col)
                 // Use move object to determine pieces on board 
                 |> Seq.map (fun move -> game.board.TryGetValue move)
-                // Ignore the Boolean value, just return players 
-                |> Seq.map (fun (result,player) -> if result then Some player else None)
-                //|> Seq.map (fun (result,player) -> player)
+                // Discard Boolean in tuple to create Seq of optional Player 
+                |> Seq.map (fun (exists,player) -> if exists then Some player else None)
 
             // Check if line contains all Cross pieces and return Cross as winner  
-            if Seq.forall (fun piece -> piece = Some Cross) pieces then TicTacToeOutcome.Win(Cross, line) else 
+            if Seq.forall (fun piece -> piece = Some Cross) pieces then Win(Cross, line) else 
             // Check if line contains all Nought pieces and return Nought as winner
-            if Seq.forall (fun piece -> piece = Some Nought) pieces then TicTacToeOutcome.Win(Nought, line) else 
+            if Seq.forall (fun piece -> piece = Some Nought) pieces then Win(Nought, line) else 
             // Check for both pieces in the line 
-            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then TicTacToeOutcome.Draw else 
+            if Seq.contains (Some Cross) pieces && Seq.contains (Some Nought) pieces then Draw else 
             // Any other outcome means the game is still undecided for this line 
-            TicTacToeOutcome.Undecided
+            Undecided
 
         let GameOutcome game = 
             // Generate all lines line game 
@@ -130,7 +124,7 @@ namespace QUT
         let GameOver game = 
             let outcome = GameOutcome game
             match outcome with 
-            | TicTacToeOutcome.Undecided -> false 
+            | Undecided -> false 
             | _ -> true 
 
         let MoveGenerator game =  
@@ -154,9 +148,6 @@ namespace QUT
             match bestMove with 
             | Some move -> move 
             | None -> raise (System.Exception("Game is over."))
-
-        let GameStart first size = 
-           { turn = first; size = size; board = new System.Collections.Generic.Dictionary<Move, Player>() }
 
         type WithAlphaBetaPruning() =
             override this.ToString()         = "Impure F# with Alpha Beta Pruning";
